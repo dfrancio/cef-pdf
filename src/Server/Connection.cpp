@@ -17,21 +17,21 @@ using namespace std::placeholders;
 void Connection::ReadSome()
 {
     m_socket.async_read_some(
-        asio::buffer(m_buffer),
+        boost::asio::buffer(m_buffer),
         std::bind(&Connection::AsyncReadSome, this, _1, _2)
     );
 }
 
 void Connection::Write()
 {
-    asio::async_write(
+    boost::asio::async_write(
         m_socket,
         ResponseToBuffers(),
         std::bind(&Connection::AsyncWrite, this, _1, _2)
     );
 }
 
-void Connection::AsyncReadSome(std::error_code ec, std::size_t bytes_transferred)
+void Connection::AsyncReadSome(const boost::system::error_code &ec, std::size_t bytes_transferred)
 {
     if (ec) {
         return;
@@ -47,15 +47,15 @@ void Connection::AsyncReadSome(std::error_code ec, std::size_t bytes_transferred
     }
 }
 
-void Connection::AsyncWrite(std::error_code ec, std::size_t bytes_transferred)
+void Connection::AsyncWrite(const boost::system::error_code &ec, std::size_t bytes_transferred)
 {
     if (!ec) {
         // Initiate graceful connection closure.
-        asio::error_code ignored_ec;
-        m_socket.shutdown(asio::ip::tcp::socket::shutdown_both, ignored_ec);
+        boost::system::error_code ignored_ec;
+        m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
     }
 
-    if (ec != asio::error::operation_aborted) {
+    if (ec != boost::asio::error::operation_aborted) {
         m_connectionManager->Stop(this);
     }
 }
@@ -95,22 +95,22 @@ void Connection::ParseRequest()
     }
 }
 
-std::vector<asio::const_buffer> Connection::ResponseToBuffers()
+std::vector<boost::asio::const_buffer> Connection::ResponseToBuffers()
 {
-    std::vector<asio::const_buffer> buffers;
+    std::vector<boost::asio::const_buffer> buffers;
 
-    buffers.push_back(asio::buffer(m_response.status));
-    buffers.push_back(asio::buffer(http::crlf));
+    buffers.push_back(boost::asio::buffer(m_response.status));
+    buffers.push_back(boost::asio::buffer(http::crlf));
 
     for (std::size_t i = 0; i < m_response.headers.size(); ++i) {
-        buffers.push_back(asio::buffer(m_response.headers[i].name));
-        buffers.push_back(asio::buffer(http::hsep));
-        buffers.push_back(asio::buffer(m_response.headers[i].value));
-        buffers.push_back(asio::buffer(http::crlf));
+        buffers.push_back(boost::asio::buffer(m_response.headers[i].name));
+        buffers.push_back(boost::asio::buffer(http::hsep));
+        buffers.push_back(boost::asio::buffer(m_response.headers[i].value));
+        buffers.push_back(boost::asio::buffer(http::crlf));
     }
 
-    buffers.push_back(asio::buffer(http::crlf));
-    buffers.push_back(asio::buffer(m_response.content));
+    buffers.push_back(boost::asio::buffer(http::crlf));
+    buffers.push_back(boost::asio::buffer(m_response.content));
 
     return buffers;
 }

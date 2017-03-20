@@ -8,9 +8,8 @@
 
 #include <string>
 #include <thread>
-#include <system_error> // std::error_code
 
-#include <asio.hpp>
+#include <boost/asio.hpp>
 
 namespace cefpdf {
 namespace server {
@@ -25,15 +24,15 @@ public:
 private:
     void Run();
     void Listen();
-    void OnSignal(std::error_code, int);
-    void OnConnection(std::error_code);
+    void OnSignal(const boost::system::error_code &, int);
+    void OnConnection(const boost::system::error_code &);
 
     CefRefPtr<cefpdf::Client> m_client;
     std::thread m_thread;
-    asio::io_service m_ioService;
-    asio::signal_set m_signals;
-    asio::ip::tcp::acceptor m_acceptor;
-    asio::ip::tcp::socket m_socket;
+    boost::asio::io_service m_ioService;
+    boost::asio::signal_set m_signals;
+    boost::asio::ip::tcp::acceptor m_acceptor;
+    boost::asio::ip::tcp::socket m_socket;
     CefRefPtr<ConnectionManager> m_connectionManager;
     int m_counter;
 

@@ -4,7 +4,7 @@
 #include "Http.h"
 
 #include "include/cef_base.h"
-#include <asio.hpp>
+#include <boost/asio.hpp>
 
 #include <functional>
 #include <utility>
@@ -21,7 +21,7 @@ class Connection : public CefBase
 public:
     Connection(
         CefRefPtr<ConnectionManager> connectionManager,
-        asio::ip::tcp::socket socket
+        boost::asio::ip::tcp::socket socket
     ) :
         m_connectionManager(connectionManager),
         m_socket(std::move(socket)) {};
@@ -53,16 +53,16 @@ public:
 
 private:
     void ReadSome();
-    void AsyncReadSome(std::error_code, std::size_t);
-    void AsyncWrite(std::error_code, std::size_t);
+    void AsyncReadSome(const boost::system::error_code &, std::size_t);
+    void AsyncWrite(const boost::system::error_code &, std::size_t);
     void ParseRequest();
-    std::vector<asio::const_buffer> ResponseToBuffers();
+    std::vector<boost::asio::const_buffer> ResponseToBuffers();
 
     CefRefPtr<ConnectionManager> m_connectionManager;
     http::Request m_request;
     http::Response m_response;
 
-    asio::ip::tcp::socket m_socket;
+    boost::asio::ip::tcp::socket m_socket;
     std::array<char, 1024*16> m_buffer;
     std::string m_requestData;
 

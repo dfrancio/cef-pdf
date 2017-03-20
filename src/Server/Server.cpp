@@ -34,10 +34,10 @@ Server::Server(
 #endif // defined(SIGQUIT)
 
     // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
-    asio::ip::tcp::resolver resolver(m_ioService);
-    asio::ip::tcp::endpoint endpoint = *resolver.resolve({address, port});
+    boost::asio::ip::tcp::resolver resolver(m_ioService);
+    boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve({address, port});
     m_acceptor.open(endpoint.protocol());
-    m_acceptor.set_option(asio::ip::tcp::acceptor::reuse_address(true));
+    m_acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
     m_acceptor.bind(endpoint);
     m_acceptor.listen();
 }
@@ -74,7 +74,7 @@ void Server::Listen()
     m_acceptor.async_accept(m_socket, std::bind(&Server::OnConnection, this, _1));
 }
 
-void Server::OnSignal(std::error_code error, int signno)
+void Server::OnSignal(const boost::system::error_code &error, int signno)
 {
     DLOG(INFO) << "Received shutdown signal";
 
@@ -84,7 +84,7 @@ void Server::OnSignal(std::error_code error, int signno)
     CefPostDelayedTask(TID_UI, base::Bind(&cefpdf::Client::Stop, m_client.get()), 50);
 }
 
-void Server::OnConnection(std::error_code error)
+void Server::OnConnection(const boost::system::error_code &error)
 {
     // Check whether the server was stopped by a signal before this
     // completion handler had a chance to run.

@@ -156,7 +156,7 @@ set_property(GLOBAL PROPERTY OS_FOLDERS ON)
 #    files as an example.
 # D. Comment in these lines:
 #
-set(CEF_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/cef")
+option(CEF_ROOT "The root of CEF directory" "${CMAKE_CURRENT_SOURCE_DIR}/cef")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
 
 # Example 3: The binary distribution is in a separate directory from your
@@ -200,8 +200,7 @@ find_package(CEF REQUIRED)
 # directory.
 add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 
-include_directories("asio")
-add_definitions(-DASIO_STANDALONE -DASIO_NO_TYPEID)
+find_package(Boost REQUIRED system)
 
 # Include application targets.
 # Comes from the <target>/CMakeLists.txt file in the current directory.
