@@ -7,9 +7,9 @@
 #include <list>
 #include <iostream>
 
-#if defined(OS_WIN)
+#if defined(_MSC_VER)
 #pragma comment(linker, "/entry:mainCRTStartup /subsystem:console")
-#endif // OS_WIN
+#endif // _MSC_VER
 
 void printSizes()
 {
