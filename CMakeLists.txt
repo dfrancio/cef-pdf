@@ -126,6 +126,8 @@ project(cef-pdf)
 # Use folders in the resulting project files.
 set_property(GLOBAL PROPERTY OS_FOLDERS ON)
 
+# Option to build the shared lib.
+option(BUILD_SHARED_LIBS "Whether to build the shared version of the library" ON)
 
 #
 # CEF_ROOT setup.
@@ -190,6 +192,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
 # Execute FindCEF.cmake which must exist in CMAKE_MODULE_PATH.
 find_package(CEF REQUIRED)
 
+if(BUILD_SHARED_LIBS)
+    set(CEF_PDF_LIBTYPE "SHARED")
+    set(BUILD_SHARED_LIBS OFF)
+endif()
 
 #
 # Define CEF-based targets.
