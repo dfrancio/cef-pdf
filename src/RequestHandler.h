@@ -12,37 +12,37 @@ class RequestHandler : public CefRequestHandler
 {
     public:
 
-    RequestHandler() {};
+    RequestHandler() {}
 
     void AddAllowedScheme(const std::string& scheme) {
         m_schemes.insert(scheme);
-    };
+    }
 
     void ClearAllowedSchemes() {
         m_schemes.clear();
-    };
+    }
 
     void RemoveAllowedScheme(const std::string& scheme) {
         auto i = m_schemes.find(scheme);
         if (i != m_schemes.end()) {
             m_schemes.erase(i);
         }
-    };
+    }
 
     // CefRequestHandler methods:
-    virtual bool OnBeforeBrowse(
+    bool OnBeforeBrowse(
         CefRefPtr<CefBrowser> browser,
         CefRefPtr<CefFrame> frame,
         CefRefPtr<CefRequest> request,
         bool is_redirect
-    );
+    ) override;
 
     private:
 
     std::set<std::string> m_schemes;
 
     // Include the default reference counting implementation.
-    IMPLEMENT_REFCOUNTING(RequestHandler);
+    IMPLEMENT_REFCOUNTING(RequestHandler)
 };
 
 } // namespace cefpdf

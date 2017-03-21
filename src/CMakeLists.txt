@@ -7,19 +7,21 @@
 #
 
 # cef-pdf sources.
-file(GLOB_RECURSE CEFPDF_SRCS "*.cpp")
-list(REMOVE_ITEM CEFPDF_SRCS "main.cpp")
+file(GLOB_RECURSE CEFPDF_SRCS "*.cpp" "*.h")
 set(CEFPDF_EXE_SRCS "main.cpp")
+foreach(src ${CEFPDF_EXE_SRCS})
+    list(REMOVE_ITEM CEFPDF_SRCS ${src})
+endforeach()
 source_group(cef-pdf FILES ${CEFPDF_SRCS})
 
 #
 # Shared configuration.
 #
 
-# Target executable names.
+# Target names.
 set(CEF_TARGET "cefpdf")
 if(OS_MACOSX)
-  set(CEF_HELPER_TARGET "cef-pdf Helper")
+  set(CEF_HELPER_TARGET "cef-pdf_Helper")
 endif()
 set(CEF_EXE_TARGET "cef-pdf")
 
@@ -29,140 +31,51 @@ ADD_LOGICAL_TARGET("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
 # Determine the target output directory.
 SET_CEF_TARGET_OUT_DIR()
 
-
-#
-# Linux configuration.
-#
-
-if(OS_LINUX)
-  # Library target.
-  add_library(${CEF_TARGET} ${CEF_PDF_LIBTYPE} ${CEFPDF_SRCS})
-  SET_LIBRARY_TARGET_PROPERTIES(${CEF_TARGET})
-  add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
-  target_link_libraries(${CEF_TARGET}
-      ${Boost_LIBRARIES} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS} -Wl,--no-fatal-warnings)
-  target_compile_options(${CEF_TARGET} PUBLIC -fexceptions)
-
-  # Executable target.
-  add_executable(${CEF_EXE_TARGET} ${CEFPDF_EXE_SRCS})
-  SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_EXE_TARGET})
-  target_link_libraries(${CEF_EXE_TARGET} ${CEF_TARGET})
-
-  # Set rpath so that libraries can be placed next to the executable.
-  set_target_properties(${CEF_EXE_TARGET} PROPERTIES INSTALL_RPATH "$ORIGIN")
-  set_target_properties(${CEF_EXE_TARGET} PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
-  set_target_properties(${CEF_EXE_TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CEF_TARGET_OUT_DIR})
-
-  # Copy binary and resource files to the target output directory.
-  COPY_FILES("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "${CEF_TARGET_OUT_DIR}")
-  COPY_FILES("${CEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "${CEF_TARGET_OUT_DIR}")
-  COPY_FILES("${CEF_EXE_TARGET}" "" "${CEF_BINARY_DIR}" "${CEF_TARGET_OUT_DIR}")
-
-  # Set SUID permissions on the chrome-sandbox target.
-  SET_LINUX_SUID_PERMISSIONS("${CEF_EXE_TARGET}" "${CEF_TARGET_OUT_DIR}/chrome-sandbox")
+# Library target.
+add_library(${CEF_TARGET} ${CEF_PDF_LIBTYPE} ${CEFPDF_SRCS})
+if(OS_MACOS)
+    list(REMOVE_ITEM CEF_LINKER_FLAGS -Wl,-pie)
 endif()
-
-
-#
-# Mac OS X configuration.
-#
-
-if(OS_MACOSX)
-  # Output paths for the app bundles.
-  set(CEF_APP "${CEF_TARGET_OUT_DIR}/${CEF_EXE_TARGET}.app")
-  set(CEF_HELPER_APP "${CEF_TARGET_OUT_DIR}/${CEF_HELPER_TARGET}.app")
-
-  # Variable referenced from Info.plist files.
-  set(PRODUCT_NAME "${CEF_EXE_TARGET}")
-
-  # Helper executable target.
-  add_executable(${CEF_HELPER_TARGET} MACOSX_BUNDLE ${CEFPDF_HELPER_SRCS})
-  SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
-  add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
-  target_link_libraries(${CEF_HELPER_TARGET}
-      ${Boost_LIBRARIES} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
-  set_target_properties(${CEF_HELPER_TARGET} PROPERTIES
-    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
-    )
-
-  # Fix the framework rpath in the helper executable.
-  FIX_MACOSX_HELPER_FRAMEWORK_RPATH(${CEF_HELPER_TARGET})
-
-  # Main library target.
-  add_library(${CEF_TARGET} ${CEF_PDF_LIBTYPE} ${CEFPDF_RESOURCES_SRCS} ${CEFPDF_SRCS})
-  SET_LIBRARY_TARGET_PROPERTIES(${CEF_TARGET})
-  add_dependencies(${CEF_TARGET} libcef_dll_wrapper "${CEF_HELPER_TARGET}")
-  target_link_libraries(${CEF_TARGET}
-      ${Boost_LIBRARIES} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
-
-  # Executable target.
-  add_executable(${CEF_EXE_TARGET} MACOSX_BUNDLE ${CEFPDF_EXE_SRCS})
-  target_link_libraries(${CEF_EXE_TARGET} ${CEF_TARGET})
-  set_target_properties(${CEF_EXE_TARGET} PROPERTIES
-    RESOURCE "${CEFPDF_RESOURCES_SRCS}"
-    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/Info.plist
-    )
-
-  # Copy files into the main app bundle.
-  add_custom_command(
-    TARGET ${CEF_EXE_TARGET}
-    POST_BUILD
-    # Copy the helper app bundle into the Frameworks directory.
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${CEF_HELPER_APP}"
-            "${CEF_APP}/Contents/Frameworks/${CEF_HELPER_TARGET}.app"
-    # Copy the CEF framework into the Frameworks directory.
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework"
-            "${CEF_APP}/Contents/Frameworks/Chromium Embedded Framework.framework"
-    VERBATIM
-    )
-
-  # Fix the framework rpath in the main library and executable.
-  FIX_MACOSX_MAIN_FRAMEWORK_RPATH(${CEF_TARGET})
-  FIX_MACOSX_MAIN_FRAMEWORK_RPATH(${CEF_EXE_TARGET})
-
-  if(NOT ${CMAKE_GENERATOR} STREQUAL "Xcode")
-    # Manually process and copy over resource files.
-    # The Xcode generator handles this via the set_target_properties RESOURCE directive.
-    set(PREFIXES "mac/")  # Remove these prefixes from input file paths.
-    COPY_MACOSX_RESOURCES("${CEFPDF_RESOURCES_SRCS}" "${PREFIXES}" "${CEF_TARGET}" "${CMAKE_CURRENT_SOURCE_DIR}" "${CEF_APP}")
-    COPY_MACOSX_RESOURCES("" "${PREFIXES}" "${CEF_EXE_TARGET}" "${CMAKE_CURRENT_SOURCE_DIR}" "${CEF_APP}")
-  endif()
+SET_LIBRARY_TARGET_PROPERTIES(${CEF_TARGET})
+if(OS_MACOS)
+    list(APPEND CEF_LINKER_FLAGS -Wl,-pie)
 endif()
-
-
-#
-# Windows configuration.
-#
-
+add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
+target_link_libraries(${CEF_TARGET} ${Boost_LIBRARIES} libcef_dll_wrapper libcef_lib ${CEF_STANDARD_LIBS})
 if(OS_WINDOWS)
-  # Library target.
-  add_library(${CEF_TARGET} ${CEF_PDF_LIBTYPE} ${CEFPDF_SRCS})
-  add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
-  SET_LIBRARY_TARGET_PROPERTIES(${CEF_TARGET})
-  target_link_libraries(${CEF_TARGET}
-      ${Boost_LIBRARIES} libcef_dll_wrapper libcef_lib ws2_32 wsock32 ${CEF_STANDARD_LIBS})
-  target_compile_options(${CEF_TARGET} PUBLIC -fexceptions)
+    target_link_libraries(${CEF_TARGET} ws2_32 wsock32)
+endif()
+target_compile_options(${CEF_TARGET} PUBLIC -fexceptions)
 
-  if(USE_SANDBOX)
-    # Logical target used to link the cef_sandbox library.
-    ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
-    target_link_libraries(${CEF_TARGET} cef_sandbox_lib ${CEF_SANDBOX_STANDARD_LIBS})
-  endif()
+# Logical target used to link the cef_sandbox library.
+if(USE_SANDBOX)
+  ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
+  target_link_libraries(${CEF_TARGET} cef_sandbox_lib ${CEF_SANDBOX_STANDARD_LIBS})
+endif()
 
-  # Executable target.
-  add_executable(${CEF_EXE_TARGET} WIN32 ${CEFPDF_EXE_SRCS})
-  SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_EXE_TARGET})
-  target_link_libraries(${CEF_EXE_TARGET} ${CEF_TARGET})
+# Executable target.
+add_executable(${CEF_EXE_TARGET} ${CEFPDF_EXE_SRCS})
+SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_EXE_TARGET})
+target_link_libraries(${CEF_EXE_TARGET} ${CEF_TARGET})
 
-  # Add the custom manifest files to the executable.
-  if(NOT MINGW)
-    ADD_WINDOWS_MANIFEST("${CMAKE_CURRENT_SOURCE_DIR}" "${CEF_TARGET}" "exe")
-  endif()
+# Set rpath so that libraries can be placed next to the executable.
+#if(OS_LINUX)
+#    set_target_properties(${CEF_EXE_TARGET} PROPERTIES INSTALL_RPATH "$ORIGIN")
+#    set_target_properties(${CEF_EXE_TARGET} PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
+#    set_target_properties(${CEF_EXE_TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CEF_TARGET_OUT_DIR})
+#endif()
 
-  # Copy binary and resource files to the target output directory.
-  COPY_FILES("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "${CEF_TARGET_OUT_DIR}")
-  COPY_FILES("${CEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "${CEF_TARGET_OUT_DIR}")
-  COPY_FILES("${CEF_EXE_TARGET}" "" "${CEF_BINARY_DIR}" "${CEF_TARGET_OUT_DIR}")
+# Add the custom manifest files to the executable.
+if(OS_WINDOWS AND NOT MINGW)
+  ADD_WINDOWS_MANIFEST("${CMAKE_CURRENT_SOURCE_DIR}" "${CEF_TARGET}" "exe")
+endif()
+
+# Copy binary and resource files to the target output directory.
+COPY_FILES("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "${CEF_TARGET_OUT_DIR}")
+COPY_FILES("${CEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "${CEF_TARGET_OUT_DIR}")
+COPY_FILES("${CEF_EXE_TARGET}" "" "${CEF_BINARY_DIR}" "${CEF_TARGET_OUT_DIR}")
+
+# Set SUID permissions on the chrome-sandbox target.
+if(OS_LINUX)
+  SET_LINUX_SUID_PERMISSIONS("${CEF_EXE_TARGET}" "${CEF_TARGET_OUT_DIR}/chrome-sandbox")
 endif()

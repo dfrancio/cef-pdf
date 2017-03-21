@@ -10,14 +10,14 @@ class StdInput : public Job
 {
 
 public:
-    virtual void accept(CefRefPtr<Visitor> visitor) {
+    void accept(CefRefPtr<Visitor> visitor) override {
         visitor->visit(this);
     };
 
 private:
 
     // Include the default reference counting implementation.
-    IMPLEMENT_REFCOUNTING(StdInput);
+    IMPLEMENT_REFCOUNTING(StdInput)
 };
 
 } // namespace job

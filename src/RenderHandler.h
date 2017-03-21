@@ -24,7 +24,7 @@ class RenderHandler : public CefRenderHandler
     private:
 
     // Include the default reference counting implementation.
-    IMPLEMENT_REFCOUNTING(RenderHandler);
+    IMPLEMENT_REFCOUNTING(RenderHandler)
 };
 
 } // namespace cefpdf

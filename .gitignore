@@ -1,3 +1,4 @@
 build/
 cef/
 *.user
+.DS_Store

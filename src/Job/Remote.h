@@ -11,24 +11,25 @@ class Remote : public Job
 
 public:
     Remote(const CefString& url) :
-        Job(), m_url(url) {};
+        Job(), m_url(url) {}
 
     const CefString& GetUrl() const {
         return m_url;
-    };
+    }
 
-    virtual void accept(CefRefPtr<Visitor> visitor) {
+    void accept(CefRefPtr<Visitor> visitor) override {
         visitor->visit(this);
-    };
+    }
 
 private:
     CefString m_url;
 
     // Include the default reference counting implementation.
-    IMPLEMENT_REFCOUNTING(Remote);
+    IMPLEMENT_REFCOUNTING(Remote)
 };
 
 } // namespace job
 } // namespace cefpdf
 
 #endif // JOB_REMOTE_H_
+

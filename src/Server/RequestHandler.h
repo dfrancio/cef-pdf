@@ -13,7 +13,7 @@ class RequestHandler : public CefBase
 {
 public:
     RequestHandler(CefRefPtr<cefpdf::Client> client) :
-        m_client(client) {};
+        m_client(client) {}
 
     RequestHandler(const RequestHandler&) = delete;
     RequestHandler& operator=(const RequestHandler&) = delete;
@@ -27,7 +27,7 @@ private:
     void SetContentLength(http::Response&);
 
     // Include the default reference counting implementation.
-    IMPLEMENT_REFCOUNTING(RequestHandler);
+    IMPLEMENT_REFCOUNTING(RequestHandler)
 };
 
 } // namespace server

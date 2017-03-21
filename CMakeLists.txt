@@ -113,8 +113,15 @@
 
 cmake_minimum_required(VERSION 2.8.12.1)
 
+if(POLICY CMP0042)
+  cmake_policy(SET CMP0042 NEW)
+endif()
+
 set(USE_SANDBOX OFF)
 set(USE_ATL OFF)
+if(APPLE)
+    set(PROJECT_ARCH x86_64)
+endif()
 
 # Only generate Debug and Release configuration types.
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
@@ -158,7 +165,7 @@ option(BUILD_SHARED_LIBS "Whether to build the shared version of the library" ON
 #    files as an example.
 # D. Comment in these lines:
 #
-option(CEF_ROOT "The root of CEF directory" "${CMAKE_CURRENT_SOURCE_DIR}/cef")
+set(CEF_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/cef" CACHE PATH "The root of CEF directory")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
 
 # Example 3: The binary distribution is in a separate directory from your

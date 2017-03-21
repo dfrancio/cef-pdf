@@ -16,7 +16,7 @@ class ConnectionManager : public CefBase
 
 public:
     ConnectionManager(CefRefPtr<RequestHandler> requestHandler) :
-        m_requestHandler(requestHandler) {};
+        m_requestHandler(requestHandler) {}
 
     ConnectionManager(const ConnectionManager&) = delete;
     ConnectionManager& operator=(const ConnectionManager&) = delete;
