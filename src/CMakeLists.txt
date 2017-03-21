@@ -32,7 +32,7 @@ ADD_LOGICAL_TARGET("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
 SET_CEF_TARGET_OUT_DIR()
 
 set(CEF_PUBLIC_HEADERS "lib.h")
-set(CEF_TARGET_INC_DIR "${CMAKE_CURRENT_BINARY_DIR}/include/cefpdf")
+set(CEF_TARGET_INC_DIR "${CEF_TARGET_OUT_DIR}/include/cefpdf")
 
 # Library target.
 add_library(${CEF_TARGET} ${CEF_PDF_LIBTYPE} ${CEFPDF_SRCS})

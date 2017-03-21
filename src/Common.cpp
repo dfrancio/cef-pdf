@@ -266,8 +266,8 @@ std::string getCurrentWorkingDirectory()
     return result;
 #else
     char result[2*4096];
-    getcwd(result, 2*4096);
-    return result;
+    char *ok = getcwd(result, 2*4096);
+    return ok ? result : "";
 #endif // OS_WIN
 }
 
