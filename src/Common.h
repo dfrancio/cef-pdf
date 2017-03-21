@@ -4,7 +4,7 @@
 #include "include/internal/cef_types.h"
 
 #include <string>
-#include <list>
+#include <vector>
 #include <chrono>
 
 namespace cefpdf {
@@ -53,7 +53,7 @@ enum struct PageOrientation {
     PORTRAIT, LANDSCAPE
 };
 
-typedef std::list<PageSize> PageSizesMap;
+typedef std::vector<PageSize> PageSizesMap;
 
 extern PageSizesMap pageSizesMap;
 
