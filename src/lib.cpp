@@ -1,13 +1,7 @@
 #include "lib.h"
 
-#include "include/cef_client.h"
-#include "include/cef_browser.h"
-
 #include "Client.h"
 #include "Job/Remote.h"
-#include "Job/Manager.h"
-#include "Job/StdInput.h"
-#include "RequestHandler.h"
 #include "Server/Server.h"
 
 struct cefpdf::App
