@@ -47,6 +47,11 @@ if(OS_MACOSX)
     set_property(TARGET ${CEF_TARGET} PROPERTY LINK_FLAGS -fno-pie)
 endif()
 
+# Export header.
+include(GenerateExportHeader)
+GENERATE_EXPORT_HEADER(${CEF_TARGET} EXPORT_FILE_NAME "${CEF_TARGET_INC_DIR}/export.h")
+target_include_directories(${CEF_TARGET} PUBLIC ${CEF_TARGET_INC_DIR})
+
 # Logical target used to link the cef_sandbox library.
 if(USE_SANDBOX)
   ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")

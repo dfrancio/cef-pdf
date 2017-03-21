@@ -4,6 +4,8 @@
 #include <memory>
 #include <string>
 
+#include "export.h"
+
 namespace cefpdf
 {
 //-----------------------------------------------------------------------------
@@ -25,33 +27,34 @@ typedef std::shared_ptr<PageSizeIterator> PageSizeIteratorPtr;
 //-----------------------------------------------------------------------------
 // Static constant accessors
 //-----------------------------------------------------------------------------
-const std::string &GetLibVersion();
-const std::string &GetDefaultPageSizeName();
-const std::string &GetDefaultServerHost();
-const std::string &GetDefaultServerPort();
+CEFPDF_EXPORT const std::string &GetLibVersion();
+CEFPDF_EXPORT const std::string &GetDefaultPageSizeName();
+CEFPDF_EXPORT const std::string &GetDefaultServerHost();
+CEFPDF_EXPORT const std::string &GetDefaultServerPort();
 
 //-----------------------------------------------------------------------------
 // Opaque pointer creation
 //-----------------------------------------------------------------------------
-AppPtr CreateApp();
-MainArgsPtr CreateMainArgs(int argc, char **argv);
-CommandLinePtr CreateCommandLine(int argc, char **argv);
-PageSizeIteratorPtr CreatePageSizeIterator();
+CEFPDF_EXPORT AppPtr CreateApp();
+CEFPDF_EXPORT MainArgsPtr CreateMainArgs(int argc, char **argv);
+CEFPDF_EXPORT CommandLinePtr CreateCommandLine(int argc, char **argv);
+CEFPDF_EXPORT PageSizeIteratorPtr CreatePageSizeIterator();
 
 //-----------------------------------------------------------------------------
 // Utility functions
 //-----------------------------------------------------------------------------
-std::string GetExecutableName(CommandLinePtr commandLine);
-bool GetNextPageSize(PageSizeIteratorPtr iterator, std::string &name, int &width, int &height);
-bool HasSwitch(CommandLinePtr commandLine, const std::string &name);
+CEFPDF_EXPORT std::string GetExecutableName(CommandLinePtr commandLine);
+CEFPDF_EXPORT bool GetNextPageSize(
+    PageSizeIteratorPtr iterator, std::string &name, int &width, int &height);
+CEFPDF_EXPORT bool HasSwitch(CommandLinePtr commandLine, const std::string &name);
 
 //-----------------------------------------------------------------------------
 // Main application procedures
 //-----------------------------------------------------------------------------
-int ExecuteSubProcess(AppPtr app, MainArgsPtr mainArgs);
-void Initialize(AppPtr app, MainArgsPtr mainArgs, CommandLinePtr commandLine);
-int RunJob(AppPtr app);
-int RunServer(AppPtr app);
+CEFPDF_EXPORT int ExecuteSubProcess(AppPtr app, MainArgsPtr mainArgs);
+CEFPDF_EXPORT void Initialize(AppPtr app, MainArgsPtr mainArgs, CommandLinePtr commandLine);
+CEFPDF_EXPORT int RunJob(AppPtr app);
+CEFPDF_EXPORT int RunServer(AppPtr app);
 
 } // namespace cefpdf
 
