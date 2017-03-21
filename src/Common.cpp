@@ -239,7 +239,7 @@ std::string pathToUri(const std::string& path)
     std::string uri = path;
 
 #if defined(OS_WIN)
-    std::regex re("^[a-z]:\\\\", std::regex_constants::icase);
+    std::regex re("^[a-zA-Z]:[\\\\/]");
     if (!std::regex_search(uri, re, std::regex_constants::match_continuous)) {
         uri = getCurrentWorkingDirectory() + std::string("\\") + uri;
     }
