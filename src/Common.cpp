@@ -17,7 +17,21 @@
 
 namespace cefpdf {
 
-PageSizesMap pageSizesMap = {
+inline int CaseInsensitiveCompare(const std::string &lhs, const std::string &rhs)
+{
+    auto *s1 = lhs.c_str();
+    auto *s2 = rhs.c_str();
+    while (*s2 != 0 && ::toupper(*s1) == ::toupper(*s2))
+        s1++, s2++;
+    return (int)(::toupper(*s1) - ::toupper(*s2));
+}
+
+bool PageSizeLess::operator()(const PageSize &lhs, const PageSize &rhs) const
+{
+    return CaseInsensitiveCompare(lhs.name, rhs.name) < 0;
+}
+
+PageSizes pageSizes = {
     {"A0", 841,  1189},
     {"A1", 594,   841},
     {"A2", 420,   594},
@@ -136,19 +150,14 @@ void parseCustomPageSize(PageSize& pageSize, const std::string& str)
 
 PageSize getPageSize(const CefString& str)
 {
-    std::string lhs = strtolower(str.ToString());
-    PageSizesMap::const_iterator it;
-
-    for (it = pageSizesMap.begin(); it != pageSizesMap.end(); ++it) {
-        std::string rhs = strtolower(it->name);
-        if (lhs == rhs) {
-            return *it;
-        }
-    }
-
     PageSize pageSize;
+    pageSize.name = str;
+    PageSizes::const_iterator it = pageSizes.find(pageSize);
+    if (it != pageSizes.end())
+        return *it;
+
     pageSize.name = "Custom";
-    parseCustomPageSize(pageSize, lhs);
+    parseCustomPageSize(pageSize, strtolower(str.ToString()));
     return pageSize;
 }
 

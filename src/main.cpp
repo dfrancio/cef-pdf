@@ -11,12 +11,11 @@
 
 void printSizes()
 {
-    for (std::size_t i = 0; i < cefpdf::GetPageSizeCount(); ++i) {
-        std::string name;
-        int width, height;
-        cefpdf::GetPageSize(i, name, width, height);
+    cefpdf::PageSizeIteratorPtr iterator =  cefpdf::CreatePageSizeIterator();
+    std::string name;
+    int width, height;
+    while (cefpdf::GetNextPageSize(iterator, name, width, height))
         std::cout << name <<  " " << width << "x" << height << std::endl;
-    }
 }
 
 void printHelp(std::string name)

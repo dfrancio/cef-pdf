@@ -9,10 +9,12 @@ namespace cefpdf {
 struct App;
 struct MainArgs;
 struct CommandLine;
+struct PageSizeIterator;
 
 typedef std::shared_ptr<App> AppPtr;
 typedef std::shared_ptr<MainArgs> MainArgsPtr;
 typedef std::shared_ptr<CommandLine> CommandLinePtr;
+typedef std::shared_ptr<PageSizeIterator> PageSizeIteratorPtr;
 
 const std::string &GetLibVersion();
 
@@ -22,9 +24,9 @@ const std::string &GetDefaultServerHost();
 
 const std::string &GetDefaultServerPort();
 
-std::size_t GetPageSizeCount();
+PageSizeIteratorPtr CreatePageSizeIterator();
 
-void GetPageSize(std::size_t i, std::string &name, int &width, int &height);
+bool GetNextPageSize(PageSizeIteratorPtr iterator, std::string &name, int &width, int &height);
 
 AppPtr CreateApp();
 

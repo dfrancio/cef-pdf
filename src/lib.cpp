@@ -33,6 +33,12 @@ struct cefpdf::CommandLine
     CommandLine() : commandLine(CefCommandLine::CreateCommandLine()) {}
 };
 
+struct cefpdf::PageSizeIterator
+{
+    cefpdf::PageSizes::const_iterator it;
+    PageSizeIterator(cefpdf::PageSizes::const_iterator iterator) : it(iterator) {}
+};
+
 const std::string &cefpdf::GetLibVersion()
 {
     return cefpdf::constants::version;
@@ -53,17 +59,22 @@ const std::string &cefpdf::GetDefaultServerPort()
     return cefpdf::constants::serverPort;
 }
 
-std::size_t cefpdf::GetPageSizeCount()
+cefpdf::PageSizeIteratorPtr cefpdf::CreatePageSizeIterator()
 {
-    return cefpdf::pageSizesMap.size();
+    return std::make_shared<cefpdf::PageSizeIterator>(cefpdf::pageSizes.begin());
 }
 
-void cefpdf::GetPageSize(std::size_t i, std::string &name, int &width, int &height)
+bool cefpdf::GetNextPageSize(PageSizeIteratorPtr iterator, std::string &name, int &width, int &height)
 {
-    PageSize &pageSize = cefpdf::pageSizesMap[i];
-    name = pageSize.name;
-    width = pageSize.width;
-    height = pageSize.height;
+    if (iterator->it != cefpdf::pageSizes.end())
+    {
+        name = iterator->it->name;
+        width = iterator->it->width;
+        height = iterator->it->height;
+        ++iterator->it;
+        return true;
+    }
+    return false;
 }
 
 cefpdf::AppPtr cefpdf::CreateApp()

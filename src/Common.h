@@ -3,9 +3,9 @@
 
 #include "include/internal/cef_types.h"
 
-#include <string>
-#include <vector>
 #include <chrono>
+#include <set>
+#include <string>
 
 namespace cefpdf {
 
@@ -38,7 +38,8 @@ namespace constants {
 struct PageSize
 {
     std::string name;
-    int width, height;
+    int width;
+    int height;
 };
 
 typedef cef_pdf_print_margin_type_t PageMarginType;
@@ -46,16 +47,24 @@ typedef cef_pdf_print_margin_type_t PageMarginType;
 struct PageMargin
 {
     PageMarginType type;
-    int top, right, bottom, left;
+    int top;
+    int right;
+    int bottom;
+    int left;
 };
 
 enum struct PageOrientation {
     PORTRAIT, LANDSCAPE
 };
 
-typedef std::vector<PageSize> PageSizesMap;
+struct PageSizeLess
+{
+    bool operator()(const PageSize &lhs, const PageSize &rhs) const;
+};
 
-extern PageSizesMap pageSizesMap;
+typedef std::set<PageSize, PageSizeLess> PageSizes;
+
+extern PageSizes pageSizes;
 
 std::string strtolower(std::string s);
 
