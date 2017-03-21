@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include "lib.h"
+#include "cefpdf.h"
 
 #if defined(_MSC_VER)
 #pragma comment(linker, "/entry:mainCRTStartup /subsystem:console")

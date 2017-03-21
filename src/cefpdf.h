@@ -1,5 +1,5 @@
-#ifndef LIB_H_
-#define LIB_H_
+#ifndef CEFPDF_H_
+#define CEFPDF_H_
 
 #include <memory>
 #include <string>
@@ -58,4 +58,4 @@ CEFPDF_EXPORT int RunServer(AppPtr app);
 
 } // namespace cefpdf
 
-#endif // LIB_H_
+#endif // CEFPDF_H_

@@ -31,7 +31,7 @@ ADD_LOGICAL_TARGET("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
 # Determine the target output directory.
 SET_CEF_TARGET_OUT_DIR()
 
-set(CEF_PUBLIC_HEADERS "lib.h")
+set(CEF_PUBLIC_HEADERS "cefpdf.h")
 set(CEF_TARGET_INC_DIR "${CEF_TARGET_OUT_DIR}/include/cefpdf")
 
 # Library target.
