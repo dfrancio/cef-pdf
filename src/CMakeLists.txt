@@ -41,7 +41,7 @@ if(OS_LINUX)
   add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
   target_link_libraries(${CEF_TARGET}
       ${Boost_LIBRARIES} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS} -Wl,--no-fatal-warnings)
-  target_compile_options(${CEF_TARGET} PRIVATE -fexceptions)
+  target_compile_options(${CEF_TARGET} PUBLIC -fexceptions)
 
   # Executable target.
   add_executable(${CEF_EXE_TARGET} ${CEFPDF_EXE_SRCS})
