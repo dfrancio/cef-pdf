@@ -33,19 +33,16 @@ SET_CEF_TARGET_OUT_DIR()
 
 # Library target.
 add_library(${CEF_TARGET} ${CEF_PDF_LIBTYPE} ${CEFPDF_SRCS})
-if(OS_MACOS)
-    list(REMOVE_ITEM CEF_LINKER_FLAGS -Wl,-pie)
-endif()
 SET_LIBRARY_TARGET_PROPERTIES(${CEF_TARGET})
-if(OS_MACOS)
-    list(APPEND CEF_LINKER_FLAGS -Wl,-pie)
-endif()
 add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
 target_link_libraries(${CEF_TARGET} ${Boost_LIBRARIES} libcef_dll_wrapper libcef_lib ${CEF_STANDARD_LIBS})
 if(OS_WINDOWS)
     target_link_libraries(${CEF_TARGET} ws2_32 wsock32)
 endif()
 target_compile_options(${CEF_TARGET} PUBLIC -fexceptions)
+if(OS_MACOSX)
+    set_property(TARGET ${CEF_TARGET} PROPERTY LINK_FLAGS -fno-pie)
+endif()
 
 # Logical target used to link the cef_sandbox library.
 if(USE_SANDBOX)
