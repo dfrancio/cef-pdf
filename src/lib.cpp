@@ -59,24 +59,6 @@ const std::string &cefpdf::GetDefaultServerPort()
     return cefpdf::constants::serverPort;
 }
 
-cefpdf::PageSizeIteratorPtr cefpdf::CreatePageSizeIterator()
-{
-    return std::make_shared<cefpdf::PageSizeIterator>(cefpdf::pageSizes.begin());
-}
-
-bool cefpdf::GetNextPageSize(PageSizeIteratorPtr iterator, std::string &name, int &width, int &height)
-{
-    if (iterator->it != cefpdf::pageSizes.end())
-    {
-        name = iterator->it->name;
-        width = iterator->it->width;
-        height = iterator->it->height;
-        ++iterator->it;
-        return true;
-    }
-    return false;
-}
-
 cefpdf::AppPtr cefpdf::CreateApp()
 {
     return std::make_shared<App>();
@@ -102,6 +84,11 @@ cefpdf::CommandLinePtr cefpdf::CreateCommandLine(int argc, char **argv)
     return result;
 }
 
+cefpdf::PageSizeIteratorPtr cefpdf::CreatePageSizeIterator()
+{
+    return std::make_shared<cefpdf::PageSizeIterator>(cefpdf::pageSizes.begin());
+}
+
 std::string cefpdf::GetExecutableName(CommandLinePtr commandLine)
 {
     std::string program = commandLine->commandLine->GetProgram().ToString();
@@ -120,6 +107,19 @@ std::string cefpdf::GetExecutableName(CommandLinePtr commandLine)
     }
 
     return program;
+}
+
+bool cefpdf::GetNextPageSize(PageSizeIteratorPtr iterator, std::string &name, int &width, int &height)
+{
+    if (iterator->it != cefpdf::pageSizes.end())
+    {
+        name = iterator->it->name;
+        width = iterator->it->width;
+        height = iterator->it->height;
+        ++iterator->it;
+        return true;
+    }
+    return false;
 }
 
 bool cefpdf::HasSwitch(CommandLinePtr commandLine, const std::string &name)
