@@ -8,29 +8,39 @@ struct cefpdf::App
 {
     CefRefPtr<cefpdf::Client> client;
     CefRefPtr<CefCommandLine> commandLine;
-    App() : client(new cefpdf::Client) {}
+    App() : client(new cefpdf::Client)
+    {
+    }
 };
 
 struct cefpdf::MainArgs
 {
     CefMainArgs args;
 #if defined(OS_WIN)
-    MainArgs(HINSTANCE hInstance) : args(hInstance) {}
+    MainArgs(HINSTANCE hInstance) : args(hInstance)
+    {
+    }
 #else
-    MainArgs(int argc, char **argv) : args(argc, argv) {}
+    MainArgs(int argc, char **argv) : args(argc, argv)
+    {
+    }
 #endif // OS_WIN
 };
 
 struct cefpdf::CommandLine
 {
     CefRefPtr<CefCommandLine> commandLine;
-    CommandLine() : commandLine(CefCommandLine::CreateCommandLine()) {}
+    CommandLine() : commandLine(CefCommandLine::CreateCommandLine())
+    {
+    }
 };
 
 struct cefpdf::PageSizeIterator
 {
     cefpdf::PageSizes::const_iterator it;
-    PageSizeIterator(cefpdf::PageSizes::const_iterator iterator) : it(iterator) {}
+    PageSizeIterator(cefpdf::PageSizes::const_iterator iterator) : it(iterator)
+    {
+    }
 };
 
 const std::string &cefpdf::GetLibVersion()
@@ -90,20 +100,23 @@ std::string cefpdf::GetExecutableName(CommandLinePtr commandLine)
     // Remove directory if present.
     // Do this before extension removal in case directory has a period character.
     const std::size_t s = program.find_last_of("\\/");
-    if (std::string::npos != s) {
+    if (std::string::npos != s)
+    {
         program.erase(0, s + 1);
     }
 
     // Remove extension if present.
     const std::size_t e = program.rfind('.');
-    if (std::string::npos != e) {
+    if (std::string::npos != e)
+    {
         program.erase(e);
     }
 
     return program;
 }
 
-bool cefpdf::GetNextPageSize(PageSizeIteratorPtr iterator, std::string &name, int &width, int &height)
+bool cefpdf::GetNextPageSize(
+    PageSizeIteratorPtr iterator, std::string &name, int &width, int &height)
 {
     if (iterator->it != cefpdf::pageSizes.end())
     {
@@ -136,29 +149,28 @@ void cefpdf::Initialize(AppPtr app, MainArgsPtr mainArgs, CommandLinePtr command
 {
     app->commandLine = commandLine->commandLine;
     app->client->Initialize(mainArgs->args);
-}
 
-void cefpdf::EnableJavaScript(AppPtr app)
-{
-    app->client->SetDisableJavaScript(false);
-}
-
-void cefpdf::DisableJavaScript(AppPtr app)
-{
-    app->client->SetDisableJavaScript(true);
+    if (commandLine->commandLine->HasSwitch("javascript"))
+        app->client->SetDisableJavaScript(false);
+    else
+        app->client->SetDisableJavaScript(true);
 }
 
 int cefpdf::RunJob(AppPtr app)
 {
     CefRefPtr<cefpdf::job::Job> job;
 
-    if (app->commandLine->HasSwitch("url")) {
+    if (app->commandLine->HasSwitch("url"))
+    {
         job = new cefpdf::job::Remote(app->commandLine->GetSwitchValue("url"));
-    } else if (app->commandLine->HasSwitch("file")) {
+    }
+    else if (app->commandLine->HasSwitch("file"))
+    {
         job = new cefpdf::job::Remote(
-            cefpdf::pathToUri(app->commandLine->GetSwitchValue("file").ToString())
-        );
-    } else {
+            cefpdf::pathToUri(app->commandLine->GetSwitchValue("file").ToString()));
+    }
+    else
+    {
         app->client->Shutdown();
         throw std::string("no input specified");
     }
@@ -166,27 +178,19 @@ int cefpdf::RunJob(AppPtr app)
     // Set output file
     CefCommandLine::ArgumentList args;
     app->commandLine->GetArguments(args);
-    if (!args.empty()) {
-        job->SetOutputPath(args[0]);
-    } else {
-        job->SetOutputPath("output.pdf");
-    }
+    job->SetOutputPath(args.empty() ? "output.pdf" : args[0]);
 
-    if (app->commandLine->HasSwitch("size")) {
+    if (app->commandLine->HasSwitch("size"))
         job->SetPageSize(app->commandLine->GetSwitchValue("size"));
-    }
 
-    if (app->commandLine->HasSwitch("margin")) {
+    if (app->commandLine->HasSwitch("margin"))
         job->SetPageMargin(app->commandLine->GetSwitchValue("margin"));
-    }
 
-    if (app->commandLine->HasSwitch("landscape")) {
+    if (app->commandLine->HasSwitch("landscape"))
         job->SetLandscape();
-    }
 
-    if (app->commandLine->HasSwitch("backgrounds")) {
+    if (app->commandLine->HasSwitch("backgrounds"))
         job->SetBackgrounds();
-    }
 
     app->client->SetStopAfterLastJob(true);
     app->client->PostJob(job);
@@ -198,17 +202,14 @@ int cefpdf::RunJob(AppPtr app)
 int cefpdf::RunServer(AppPtr app)
 {
     std::string port = cefpdf::constants::serverPort;
-    if (app->commandLine->HasSwitch("port")) {
+    if (app->commandLine->HasSwitch("port"))
         port = app->commandLine->GetSwitchValue("port").ToString();
-    }
 
     std::string host = cefpdf::constants::serverHost;
-    if (app->commandLine->HasSwitch("host")) {
+    if (app->commandLine->HasSwitch("host"))
         host = app->commandLine->GetSwitchValue("host").ToString();
-    }
 
     CefRefPtr<cefpdf::server::Server> server = new cefpdf::server::Server(app->client, host, port);
-
     server->Start();
 
     return 0;

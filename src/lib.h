@@ -1,11 +1,11 @@
 #ifndef LIB_H_
 #define LIB_H_
 
-#include <string>
 #include <memory>
+#include <string>
 
-namespace cefpdf {
-
+namespace cefpdf
+{
 //-----------------------------------------------------------------------------
 // Forward declarations
 //-----------------------------------------------------------------------------
@@ -50,8 +50,6 @@ bool HasSwitch(CommandLinePtr commandLine, const std::string &name);
 //-----------------------------------------------------------------------------
 int ExecuteSubProcess(AppPtr app, MainArgsPtr mainArgs);
 void Initialize(AppPtr app, MainArgsPtr mainArgs, CommandLinePtr commandLine);
-void EnableJavaScript(AppPtr app);
-void DisableJavaScript(AppPtr app);
 int RunJob(AppPtr app);
 int RunServer(AppPtr app);
 
