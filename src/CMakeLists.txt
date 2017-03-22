@@ -72,24 +72,22 @@ include(GenerateExportHeader)
 GENERATE_EXPORT_HEADER(${CEF_TARGET} EXPORT_FILE_NAME "${CEF_TARGET_INC_DIR}/export.h")
 target_include_directories(${CEF_TARGET} PUBLIC ${CEF_TARGET_INC_DIR})
 
-# Logical target used to link the cef_sandbox library.
 if(USE_SANDBOX)
+  # Logical target used to link the cef_sandbox library.
   ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
   target_link_libraries(${CEF_TARGET} cef_sandbox_lib ${CEF_SANDBOX_STANDARD_LIBS})
 endif()
 
-# Helper executable target.
 if(OS_MACOSX)
+    # Helper executable target.
     add_executable(${CEF_HELPER_TARGET} ${CEFPDF_HELPER_SRCS})
     SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
     target_link_libraries(${CEF_HELPER_TARGET} ${CEF_TARGET})
     set_target_properties(${CEF_HELPER_TARGET} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY
             "${CEF_TARGET_FRAMEWORK_DIR}/${CEF_HELPER_TARGET}.app/Contents/MacOS")
-    add_custom_command(
-        TARGET ${CEF_HELPER_TARGET}
-        POST_BUILD
-        # Use whitespace on Helper target.
+    # Use whitespace on Helper target.
+    add_custom_command(TARGET ${CEF_HELPER_TARGET} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E remove_directory
             "${CEF_TARGET_FRAMEWORK_DIR}/${CEF_HELPER_TARGET_WS}.app"
         COMMAND ${CMAKE_COMMAND} -E rename
@@ -107,8 +105,16 @@ add_executable(${CEF_EXE_TARGET} ${CEFPDF_EXE_SRCS})
 SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_EXE_TARGET})
 target_link_libraries(${CEF_EXE_TARGET} ${CEF_TARGET})
 
-# Add the custom manifest files to the executable.
+if(OS_LINUX)
+    # Set rpath so that libraries can be placed next to the executable.
+    set_target_properties(${CEF_EXE_TARGET} PROPERTIES INSTALL_RPATH "$ORIGIN")
+    set_target_properties(${CEF_EXE_TARGET} PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
+    # Set SUID permissions on the chrome-sandbox target.
+    SET_LINUX_SUID_PERMISSIONS("${CEF_EXE_TARGET}" "${CEF_TARGET_OUT_DIR}/chrome-sandbox")
+endif()
+
 if(OS_WINDOWS AND NOT MINGW)
+    # Add the custom manifest files to the executable.
   ADD_WINDOWS_MANIFEST("${CMAKE_CURRENT_SOURCE_DIR}" "${CEF_TARGET}" "exe")
 endif()
 
@@ -116,19 +122,13 @@ endif()
 COPY_FILES("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "${CEF_TARGET_BINARY_DIR}")
 COPY_FILES("${CEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "${CEF_TARGET_RESOURCE_DIR}")
 COPY_FILES("${CEF_TARGET}" "${CEFPDF_PUBLIC_HEADERS}" "${CMAKE_CURRENT_SOURCE_DIR}" "${CEF_TARGET_INC_DIR}")
+
 if(OS_MACOSX)
-    add_custom_command(
-        TARGET ${CEF_TARGET}
-        POST_BUILD
-        # Copy the CEF framework into the Frameworks directory.
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
+    # Copy the CEF framework into the Frameworks directory.
+    add_custom_command(TARGET ${CEF_TARGET} POST_BUILD
+        COMMAND rsync -r
             "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework"
-            "${CEF_TARGET_FRAMEWORK_DIR}/Chromium Embedded Framework.framework"
+            "${CEF_TARGET_FRAMEWORK_DIR}"
         VERBATIM
     )
-endif()
-
-# Set SUID permissions on the chrome-sandbox target.
-if(OS_LINUX)
-  SET_LINUX_SUID_PERMISSIONS("${CEF_EXE_TARGET}" "${CEF_TARGET_OUT_DIR}/chrome-sandbox")
 endif()
