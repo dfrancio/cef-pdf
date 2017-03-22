@@ -117,8 +117,8 @@ if(OS_MACOSX)
     add_custom_command(
         TARGET ${CEF_TARGET}
         POST_BUILD
-        # Symlink the CEF framework into the Frameworks directory.
-        COMMAND ${CMAKE_COMMAND} -E create_symlink
+        # Copy the CEF framework into the Frameworks directory.
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CEF_BINARY_DIR}/Chromium Embedded Framework.framework"
             "${CEF_TARGET_FRAMEWORK_DIR}/Chromium Embedded Framework.framework"
         VERBATIM
