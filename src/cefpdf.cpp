@@ -136,13 +136,13 @@ bool cefpdf::HasSwitch(CommandLinePtr commandLine, const std::string &name)
 
 int cefpdf::ExecuteSubProcess(AppPtr app, MainArgsPtr mainArgs)
 {
-#if !defined(OS_MACOSX)
+//#if !defined(OS_MACOSX)
     // Execute the sub-process logic, if any. This will either return immediately for the browser
     // process or block until the sub-process should exit.
     return app->client->ExecuteSubProcess(mainArgs->args);
-#else
-    return 0;
-#endif // !OS_MACOSX
+//#else
+//    return 0;
+//#endif // !OS_MACOSX
 }
 
 void cefpdf::Initialize(AppPtr app, MainArgsPtr mainArgs, CommandLinePtr commandLine)

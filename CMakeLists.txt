@@ -113,15 +113,15 @@
 
 cmake_minimum_required(VERSION 2.8.12.1)
 
-if(POLICY CMP0042)
-  cmake_policy(SET CMP0042 NEW)
+if(APPLE)
+    if(POLICY CMP0042)
+      cmake_policy(SET CMP0042 NEW)
+    endif()
+    set(PROJECT_ARCH x86_64)
 endif()
 
 set(USE_SANDBOX OFF)
 set(USE_ATL OFF)
-if(APPLE)
-    set(PROJECT_ARCH x86_64)
-endif()
 
 # Only generate Debug and Release configuration types.
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
