@@ -105,6 +105,12 @@ add_executable(${CEF_EXE_TARGET} ${CEFPDF_EXE_SRCS})
 SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_EXE_TARGET})
 target_link_libraries(${CEF_EXE_TARGET} ${CEF_TARGET})
 
+if(OS_MACOSX)
+    # Set rpath so that libraries can be placed next to the executable.
+    set_target_properties(${CEF_EXE_TARGET} PROPERTIES INSTALL_RPATH "@loader_path")
+    set_target_properties(${CEF_EXE_TARGET} PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
+endif()
+
 if(OS_LINUX)
     # Set rpath so that libraries can be placed next to the executable.
     set_target_properties(${CEF_EXE_TARGET} PROPERTIES INSTALL_RPATH "$ORIGIN")
