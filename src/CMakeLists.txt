@@ -121,7 +121,7 @@ endif()
 
 if(OS_WINDOWS AND NOT MINGW)
     # Add the custom manifest files to the executable.
-  ADD_WINDOWS_MANIFEST("${CMAKE_CURRENT_SOURCE_DIR}" "${CEF_TARGET}" "exe")
+  ADD_WINDOWS_MANIFEST("${CMAKE_CURRENT_SOURCE_DIR}" "${CEF_EXE_TARGET}" "exe")
 endif()
 
 # Copy binary and resource files to the target output directory.
