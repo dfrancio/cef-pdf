@@ -105,16 +105,16 @@ CefRefPtr<CefBrowserProcessHandler> Client::GetBrowserProcessHandler()
     return this;
 }
 
-void Client::OnRegisterCustomSchemes(CefRefPtr<CefSchemeRegistrar> registrar)
+void Client::OnRegisterCustomSchemes(CefRawPtr<CefSchemeRegistrar> registrar)
 {
-    registrar->AddCustomScheme(constants::scheme, true, false, false);
+    registrar->AddCustomScheme(constants::scheme, true, false, false, false, true, false);
 }
 
 void Client::OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr<CefCommandLine> command_line)
 {
     command_line->AppendSwitch("disable-gpu");
     command_line->AppendSwitch("disable-gpu-compositing");
-};
+}
 
 // CefBrowserProcessHandler methods:
 // -----------------------------------------------------------------------------

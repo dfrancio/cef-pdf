@@ -10,7 +10,7 @@ class Local;
 class Remote;
 class StdInput;
 
-class Visitor : public CefBase
+class Visitor : public CefBaseRefCounted
 {
 
 public:
@@ -20,7 +20,6 @@ public:
     virtual void visit(CefRefPtr<Remote>) = 0;
     virtual void visit(CefRefPtr<StdInput>) = 0;
 
-private:
     // Include the default reference counting implementation.
     IMPLEMENT_REFCOUNTING(Visitor)
 };
