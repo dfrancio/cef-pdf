@@ -87,13 +87,11 @@ void Client::CreateBrowsers(unsigned int browserCount) {
     return;
   }
 
-  while (m_pendingBrowsersCount > 0 &&
-         m_browsersCount <= constants::maxProcesses) {
-    --m_pendingBrowsersCount;
-    ++m_browsersCount;
-    CefBrowserHost::CreateBrowser(m_windowInfo, this, "", m_browserSettings,
-                                  NULL);
-  }
+    while (m_pendingBrowsersCount > 0 && m_browsersCount <= constants::maxProcesses) {
+        --m_pendingBrowsersCount;
+        ++m_browsersCount;
+        CefBrowserHost::CreateBrowser(m_windowInfo, this, "", m_browserSettings, NULL, NULL);
+    }
 }
 
 // CefApp methods:
@@ -160,10 +158,13 @@ CefRefPtr<CefRenderHandler> Client::GetRenderHandler() {
 
 CefRefPtr<CefRequestHandler> Client::GetRequestHandler() { return this; }
 
-bool Client::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
-                                      CefProcessId source_process,
-                                      CefRefPtr<CefProcessMessage> message) {
-  DLOG(INFO) << "Client::OnProcessMessageReceived";
+bool Client::OnProcessMessageReceived(
+    CefRefPtr<CefBrowser> browser,
+    CefRefPtr<CefFrame> frame,
+    CefProcessId source_process,
+    CefRefPtr<CefProcessMessage> message
+) {
+    DLOG(INFO) << "Client::OnProcessMessageReceived";
 
   CEF_REQUIRE_UI_THREAD();
 
