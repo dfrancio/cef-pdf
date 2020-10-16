@@ -3,12 +3,18 @@
 namespace cefpdf {
 namespace job {
 
-Job::Job()
+Job::Job() :
+    m_outputPath(),
+    m_pageSize(),
+    m_pageOrientation(PageOrientation::PORTRAIT),
+    m_pageMargin(),
+    m_backgrounds(false),
+    m_status(Job::Status::PENDING),
+    m_callback(),
+    m_scale(100)
 {
     SetPageSize(cefpdf::constants::pageSize);
     SetPageMargin("default");
-    m_pageOrientation = PageOrientation::PORTRAIT;
-    m_backgrounds = false;
 }
 
 void Job::SetPageSize(const CefString& pageSize)
@@ -31,10 +37,17 @@ void Job::SetBackgrounds(bool flag)
     m_backgrounds = flag;
 }
 
+void Job::SetScale(int scale)
+{
+    DLOG(INFO) << "Scale factor: " << scale;
+    m_scale = scale;
+}
+
 CefPdfPrintSettings Job::GetCefPdfPrintSettings() const
 {
     CefPdfPrintSettings pdfSettings;
 
+    pdfSettings.scale_factor = m_scale;
     pdfSettings.backgrounds_enabled = m_backgrounds;
     pdfSettings.landscape = (m_pageOrientation == PageOrientation::LANDSCAPE);
 

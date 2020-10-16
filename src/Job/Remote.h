@@ -11,15 +11,15 @@ class Remote : public Job
 
 public:
     Remote(const CefString& url) :
-        Job(), m_url(url) {};
+        Job(), m_url(url) {}
 
     const CefString& GetUrl() const {
         return m_url;
-    };
+    }
 
-    virtual void accept(CefRefPtr<Visitor> visitor) {
+    virtual void accept(CefRefPtr<Visitor> visitor) override {
         visitor->visit(this);
-    };
+    }
 
 private:
     CefString m_url;

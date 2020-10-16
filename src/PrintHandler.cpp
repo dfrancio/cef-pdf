@@ -10,28 +10,40 @@ PrintHandler::PrintHandler() {}
 // -------------------------------------------------------------------------
 CefSize PrintHandler::GetPdfPaperSize(int device_units_per_inch)
 {
-    DLOG(INFO) << "PrintHandler::GetPdfPaperSize: " << device_units_per_inch;
+    DLOG(INFO)
+        << "PrintHandler::GetPdfPaperSize"
+        << " with device_units_per_inch: " << device_units_per_inch;
 
     return CefSize(device_units_per_inch*100, device_units_per_inch*100*2);
 }
 
-bool PrintHandler::OnPrintDialog(bool has_selection, CefRefPtr<CefPrintDialogCallback> callback)
-{
+bool PrintHandler::OnPrintDialog(
+    CefRefPtr<CefBrowser> browser,
+    bool has_selection,
+    CefRefPtr<CefPrintDialogCallback> callback
+) {
     return true;
 }
 
-bool PrintHandler::OnPrintJob(const CefString& document_name, const CefString& pdf_file_path, CefRefPtr<CefPrintJobCallback> callback)
-{
+bool PrintHandler::OnPrintJob(
+    CefRefPtr<CefBrowser> browser,
+    const CefString& document_name,
+    const CefString& pdf_file_path,
+    CefRefPtr<CefPrintJobCallback> callback
+) {
     return true;
 }
 
-void PrintHandler::OnPrintReset()
+void PrintHandler::OnPrintReset(CefRefPtr<CefBrowser> browser)
 {
 
 }
 
-void PrintHandler::OnPrintSettings(CefRefPtr<CefPrintSettings> settings, bool get_defaults)
-{
+void PrintHandler::OnPrintSettings(
+    CefRefPtr<CefBrowser> browser,
+    CefRefPtr<CefPrintSettings> settings,
+    bool get_defaults
+) {
 
 }
 

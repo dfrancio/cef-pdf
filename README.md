@@ -10,15 +10,16 @@
       --help -h        This help screen.
       --url=<url>      URL to load, may be http, file, data, anything supported by Chromium.
       --file=<path>    File path to load using file:// scheme. May be relative to current directory.
+      --stdin          Read content from standard input until EOF (Unix: Ctrl+D, Windows: Ctrl+Z).
       --size=<spec>    Size (format) of the paper: A3, B2.. or custom <width>x<height> in mm.
                        A4 is the default.
       --list-sizes     Show all defined page sizes.
       --landscape      Wheather to print with a landscape page orientation.
-                       Default is portrait
+                       Default is portrait.
       --margin=<spec>  Paper margins in mm (much like CSS margin but without units)
                        If omitted some default margin is applied.
       --javascript     Enable JavaScript.
-      --backgrounds    Print with backgrounds.
+      --backgrounds    Print with backgrounds. Default is without.
 
     Server options:
       --server         Start HTTP server
@@ -27,7 +28,7 @@
       --port=<port>    Specify server port number. Default is 9288
 
     Output:
-      PDF file name to create. Default is output.pdf
+      PDF file name to create. Default is to write binary data to standard output.
 
 ### HTTP server usage
 
@@ -40,16 +41,18 @@ Execute `cef-pdf` with `--server` option and visit `localhost:9288` with web bro
 
 To receive a PDF, just make POST request to `localhost:9288/foo.pdf`with some HTML content as the request body. `foo` may be any name you choose, `.pdf` suffix is always required. The response will contain the PDF data, with `application/pdf` as the content type.
 
-In addition to POSTing content inside the request body, special HTTP header `Content-Location` is supported, which should be an URL to some external content. `cef-pdf`will try to grab the content from this URL and use it just like it was the request's body. In this case, instead of POST, GET request is more appropriate (at the time of writing this, both methods are allowed).
+In addition to POSTing content inside the request body, special HTTP header `Content-Location` is supported, which should be an URL to some external content. `cef-pdf` will try to grab the content from this URL and use it just like it was the request's body.
 
 ### Building
 
-In order to build, [CEF build distribution files](http://opensource.spotify.com/cefbuilds/index.html) must be placed in cef/ subdirectory. `cef-pdf` should compile without problems with cmake/ninja on Windows 7+ and Linux (tested on Debian 8.5.0 x64), using decent C++11 compiler. Mac OS X needs some work (contributors welcome).
+`cef-pdf` should compile without problems with cmake/ninja on Windows (7, x64), Linux (tested on Debian 8.5.0, x64) and Mac OS X (10.11.6) using decent C++11 compiler. In order to build, [CEF build distribution files](http://opensource.spotify.com/cefbuilds/index.html) must be downloaded and placed in some directory, like `/path/to/cef/release` in the example below.
 
-### TODO
-
- - Mac OS X versions
- - Improve performance
+```
+$ mkdir ~/build
+$ cd ~/build
+$ cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCEF_ROOT=/path/to/cef/release /path/to/cef-pdf
+$ ninja
+```
 
 ### License
 

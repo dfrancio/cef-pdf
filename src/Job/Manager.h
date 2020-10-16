@@ -12,13 +12,11 @@
 namespace cefpdf {
 namespace job {
 
-class Manager : public CefBase
+class Manager : public CefBaseRefCounted
 {
 
 public:
-    typedef CefLoadHandler::ErrorCode ErrorCode;
-
-    Manager() {};
+    Manager() {}
 
     std::size_t Queue(CefRefPtr<Job> job);
 
@@ -26,11 +24,13 @@ public:
 
     CefRefPtr<CefStreamReader> GetStreamReader(CefRefPtr<CefBrowser> browser);
 
-    void Abort(CefRefPtr<CefBrowser> browser, ErrorCode errorCode);
-
     void Process(CefRefPtr<CefBrowser> browser, int httpStatusCode);
 
     void Finish(CefRefPtr<CefBrowser> browser, const CefString& path, bool ok);
+
+    void Abort(CefRefPtr<CefBrowser> browser, CefLoadHandler::ErrorCode errorCode);
+
+    void StopAll();
 
 private:
     std::queue<CefRefPtr<Job>> m_jobsQueue;
@@ -47,9 +47,7 @@ private:
 
     Iterator Find(CefRefPtr<CefBrowser> browser);
 
-    void Resolve(Manager::Iterator it, const std::string&);
-
-    unsigned int m_counter = 0;
+    void Resolve(Manager::Iterator it, const Job::Status&);
 
     // Include the default reference counting implementation.
     IMPLEMENT_REFCOUNTING(Manager);

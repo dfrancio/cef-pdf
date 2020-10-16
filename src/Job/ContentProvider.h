@@ -14,26 +14,31 @@ class ContentProvider : public Visitor
 {
 
 public:
-    ContentProvider() {};
+    ContentProvider() {}
 
     CefRefPtr<CefStreamReader> GetStreamReader() const {
         return m_reader;
-    };
+    }
 
-    virtual void visit(CefRefPtr<Local> job) {
+    virtual void visit(CefRefPtr<Local> job) override {
+        auto content = job->GetContent();
+        if (content.empty()) {
+            content = "<!DOCTYPE html>";
+        }
+
         m_reader = CefStreamReader::CreateForData(
-            static_cast<void*>(const_cast<char*>(job->GetContent().c_str())),
-            job->GetContent().size()
+            static_cast<void*>(const_cast<char*>(content.c_str())),
+            content.size()
         );
-    };
+    }
 
-    virtual void visit(CefRefPtr<Remote> job) {
+    virtual void visit(CefRefPtr<Remote> job) override {
         // no implementation
-    };
+    }
 
-    virtual void visit(CefRefPtr<StdInput> job) {
+    virtual void visit(CefRefPtr<StdInput> job) override {
         m_reader = CefStreamReader::CreateForHandler(new StdInputStreamReader);
-    };
+    }
 
 private:
     CefRefPtr<CefStreamReader> m_reader;

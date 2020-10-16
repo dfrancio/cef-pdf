@@ -2,17 +2,32 @@
 
 namespace cefpdf {
 
-RenderHandler::RenderHandler() {}
+RenderHandler::RenderHandler() 
+{
+    m_viewWidth = 128;
+    m_viewHeight = 128;
+}
+
+void RenderHandler::SetViewWidth(int viewWidth)
+{
+    m_viewWidth = viewWidth;
+    DLOG(INFO) << "View width: " << m_viewWidth;
+}
+
+void RenderHandler::SetViewHeight(int viewHeight)
+{
+    m_viewHeight = viewHeight;
+    DLOG(INFO) << "View height: " << m_viewHeight;
+}
 
 // CefRenderHandler methods:
 // -------------------------------------------------------------------------
-bool RenderHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect)
+void RenderHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect)
 {
     rect.x = 0;
     rect.y = 0;
-    rect.width = 128;
-    rect.height = 128;
-    return true;
+    rect.width = m_viewWidth;
+    rect.height = m_viewHeight;
 }
 
 void RenderHandler::OnPaint(

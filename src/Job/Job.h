@@ -7,33 +7,49 @@
 #include "include/cef_base.h"
 
 #include <string>
-#include <future>
+#include <functional>
 
 namespace cefpdf {
 namespace job {
 
-class Job : public CefBase
+class Job : public CefBaseRefCounted
 {
+
 public:
+    typedef std::function<void(CefRefPtr<Job>)> Callback;
+
+    enum struct Status {
+        PENDING,
+        LOADING,
+        PRINTING,
+        SUCCESS,
+        HTTP_ERROR,
+        ABORTED,
+        LOAD_ERROR,
+        PRINT_ERROR
+    };
+
     Job();
 
-    std::future<std::string> GetFuture() {
-        return m_promise.get_future();
-    };
+    void SetCallback(Callback callback) {
+        m_callback = callback;
+    }
 
-    void Resolve(std::string value) {
-        m_promise.set_value(value);
-    };
+    void ExecuteCallback() {
+        if (m_callback != nullptr) {
+            m_callback(this);
+        }
+    }
 
     virtual void accept(CefRefPtr<Visitor> visitor) = 0;
 
     const CefString& GetOutputPath() const {
         return m_outputPath;
-    };
+    }
 
     void SetOutputPath(const CefString& outputPath) {
         m_outputPath = outputPath;
-    };
+    }
 
     void SetPageSize(const CefString& pageSize);
 
@@ -43,8 +59,18 @@ public:
 
     void SetBackgrounds(bool flag = true);
 
+    void SetScale(int scale);
+
     // Get prepared PDF setting for CEF
     CefPdfPrintSettings GetCefPdfPrintSettings() const;
+
+    Status GetStatus() {
+        return m_status;
+    }
+
+    void SetStatus(Status status) {
+        m_status = status;
+    }
 
 private:
     CefString m_outputPath;
@@ -52,7 +78,9 @@ private:
     PageOrientation m_pageOrientation;
     PageMargin m_pageMargin;
     bool m_backgrounds;
-    std::promise<std::string> m_promise;
+    Status m_status;
+    Callback m_callback;
+    int m_scale;
 
     // Include the default reference counting implementation.
     IMPLEMENT_REFCOUNTING(Job);

@@ -9,10 +9,15 @@
 #include <regex>
 #include <functional>
 #include <random>
-#include <cstdlib>
+#include <sstream>
+#include <iomanip>
 
 #if !defined(OS_WIN)
-#include <unistd.h> // getcwd()
+#include <sys/types.h> // pid_t
+#include <sys/stat.h> // stat()
+#include <unistd.h> // access(), getcwd()
+#else
+#include "Shlwapi.h" // PathFileExistsW
 #endif
 
 namespace cefpdf {
@@ -219,6 +224,36 @@ PageMargin getPageMargin(const CefString& str)
     return pageMargin;
 }
 
+#if defined(OS_WIN)
+// Convert a wide Unicode string to an UTF8 string
+// https://stackoverflow.com/a/3999597
+std::string utf8_encode(const std::wstring &wstr)
+{
+    if (wstr.empty()) {
+        return std::string();
+    }
+
+    int size_needed = ::WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int) wstr.size(), NULL, 0, NULL, NULL);
+    std::string strTo(size_needed, 0);
+    ::WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int) wstr.size(), &strTo[0], size_needed, NULL, NULL);
+    return strTo;
+}
+
+// Convert an UTF8 string to a wide Unicode String
+// https://stackoverflow.com/a/3999597
+std::wstring utf8_decode(const std::string &str)
+{
+    if (str.empty()) {
+        return std::wstring();
+    }
+
+    int size_needed = ::MultiByteToWideChar(CP_UTF8, 0, &str[0], (int) str.size(), NULL, 0);
+    std::wstring wstrTo(size_needed, 0);
+    ::MultiByteToWideChar(CP_UTF8, 0, &str[0], (int) str.size(), &wstrTo[0], size_needed);
+    return wstrTo;
+}
+#endif // OS_WIN
+
 std::chrono::microseconds::rep microtime()
 {
     auto tt = std::chrono::system_clock::now().time_since_epoch();
@@ -227,12 +262,16 @@ std::chrono::microseconds::rep microtime()
 
 std::string pathToUri(const std::string& path)
 {
+    if (path.empty()) {
+        return std::string("");
+    }
+
     std::string uri = path;
 
 #if defined(OS_WIN)
     std::regex re("^[a-z]:\\\\", std::regex_constants::icase);
     if (!std::regex_search(uri, re, std::regex_constants::match_continuous)) {
-        uri = getCurrentWorkingDirectory() + std::string("\\") + uri;
+        uri = constants::cwd + std::string("\\") + uri;
     }
 
     // De-windows the path
@@ -240,7 +279,7 @@ std::string pathToUri(const std::string& path)
     uri = std::string("/") + uri;
 #else
     if (uri.front() != '/') {
-        uri = getCurrentWorkingDirectory() + std::string("/") + uri;
+        uri = constants::cwd + std::string("/") + uri;
     }
 #endif // OS_WIN
 
@@ -252,13 +291,10 @@ std::string getCurrentWorkingDirectory()
 #if defined(OS_WIN)
     wchar_t lpBuffer[MAX_PATH];
     ::GetCurrentDirectoryW(MAX_PATH, lpBuffer);
-    char result[2*MAX_PATH];
-    std::wcstombs(result, lpBuffer, sizeof(result));
-    return result;
+    return utf8_encode(lpBuffer);
 #else
     char result[2*4096];
-    getcwd(result, 2*4096);
-    return result;
+    return ::getcwd(result, sizeof(result));
 #endif // OS_WIN
 }
 
@@ -267,19 +303,40 @@ std::string getTempDirectory()
 #if defined(OS_WIN)
     wchar_t lpBuffer[MAX_PATH];
     ::GetTempPathW(MAX_PATH, lpBuffer);
-    char result[2*MAX_PATH];
-    std::wcstombs(result, lpBuffer, sizeof(result));
-    return result;
+    return utf8_encode(lpBuffer);
 #else
     const char* vars[4] = {"TMPDIR", "TMP", "TEMP", "TEMPDIR"};
     for (int i = 0; i < 4; ++i) {
         char* val = std::getenv(vars[i]);
         if (val) {
-            return std::string(val) + "/";
+            auto p = std::string(val);
+            if (p.back() != '/') {
+                p += '/';
+            }
+
+            return p;
         }
     }
 
     return "/tmp/";
+#endif // OS_WIN
+}
+
+std::string getProcessId()
+{
+#if defined(OS_WIN)
+    return std::to_string(::GetCurrentProcessId());
+#else
+    return std::to_string(::getpid());
+#endif // OS_WIN
+}
+
+bool fileExists(const std::string& path)
+{
+#if defined(OS_WIN)
+    return ::PathFileExistsW(utf8_decode(path).c_str()) == TRUE;
+#else
+    return ::access(path.c_str(), F_OK) == 0;
 #endif // OS_WIN
 }
 
@@ -289,14 +346,9 @@ std::string reserveTempFile()
     std::random_device rd;
     std::mt19937 g(rd());
     std::shuffle(letters.begin(), letters.end(), g);
-    std::string path = constants::temp + "cef_" + letters + ".pdf";
+    std::string path = constants::tmp + "cef_" + letters + "-" + constants::pid + ".pdf";
 
-    std::ifstream file;
-    file.open(path);
-    bool isGood = file.good();
-    file.close();
-
-    return isGood ? reserveTempFile() : path;
+    return fileExists(path) ? reserveTempFile() : path;
 }
 
 std::string loadTempFile(const std::string& path, bool remove)
@@ -321,6 +373,37 @@ std::string loadTempFile(const std::string& path, bool remove)
 bool deleteTempFile(const std::string& path)
 {
     return 0 == std::remove(path.c_str());
+}
+
+std::string formatDate(const char* format, std::time_t* arg)
+{
+    std::time_t t = std::time(arg);
+    std::ostringstream buffer;
+    buffer << std::put_time(std::gmtime(&t), format);
+    return buffer.str();
+}
+
+bool stringsEqual(const std::string& a, const std::string& b)
+{
+    auto sz = a.size();
+
+    if (b.size() != sz) {
+        return false;
+    }
+
+    for (unsigned int i = 0; i < sz; ++i) {
+        if (std::tolower(a[i]) != std::tolower(b[i])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool matchScheme(const std::string& url, const std::string& scheme)
+{
+    std::string s = strtolower(scheme) + ":";
+    return 0 == strtolower(url).find(s);
 }
 
 } // namespace cefpdf

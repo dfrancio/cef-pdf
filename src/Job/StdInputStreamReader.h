@@ -7,39 +7,27 @@
 #include <cstdio>
 #include <string>
 #include <iostream>
-#include <algorithm>
 
 namespace cefpdf {
 namespace job {
 
 class StdInputStreamReader : public CefReadHandler
 {
-    public:
 
-    StdInputStreamReader() : m_initialized(false) {};
+public:
+    StdInputStreamReader();
 
-    void Initialize();
+    virtual int Eof() override;
 
-    virtual int Eof() {
-        return std::cin.eof() ? 1 : 0;
-    };
+    virtual bool MayBlock() override;
 
-    virtual bool MayBlock() {
-        return true;
-    };
+    virtual std::size_t Read(void* ptr, std::size_t size, std::size_t n) override;
 
-    virtual std::size_t Read(void* ptr, std::size_t size, std::size_t n);
+    virtual int Seek(int64 offset, int whence) override;
 
-    virtual int Seek(int64 offset, int whence);
+    virtual int64 Tell() override;
 
-    virtual int64 Tell() {
-        return std::cin.tellg();
-    };
-
-    private:
-
-    bool m_initialized;
-
+private:
     // Include the default reference counting implementation.
     IMPLEMENT_REFCOUNTING(StdInputStreamReader);
 };

@@ -17,19 +17,19 @@ class Loader : public Visitor
 
 public:
     Loader(CefRefPtr<CefFrame> frame) :
-        m_frame(frame) {};
+        m_frame(frame) {}
 
-    virtual void visit(CefRefPtr<Local> job) {
+    virtual void visit(CefRefPtr<Local> job) override {
         m_frame->LoadURL(cefpdf::constants::scheme + "://local");
-    };
+    }
 
-    virtual void visit(CefRefPtr<Remote> job) {
+    virtual void visit(CefRefPtr<Remote> job) override {
         m_frame->LoadURL(job->GetUrl());
-    };
+    }
 
-    virtual void visit(CefRefPtr<StdInput> job) {
+    virtual void visit(CefRefPtr<StdInput> job) override {
         m_frame->LoadURL(cefpdf::constants::scheme + "://stdin");
-    };
+    }
 
 private:
     CefRefPtr<CefFrame> m_frame;
