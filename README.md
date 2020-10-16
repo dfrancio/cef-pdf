@@ -1,3 +1,9 @@
+# INFORMAÇÕES FALKER #
+ seguinte versão do binário mínimo do cef foi utilizada para a compilação:
+cef_binary_83.5.0+gbf03589+chromium-83.0.4103.106_linux64_minimal
+(http://opensource.spotify.com/cefbuilds/cef_binary_83.5.0%2Bgbf03589%2Bchromium-83.0.4103.106_linux32_minimal.tar.bz2)
+
+
 # cef-pdf
 
 `cef-pdf` is a command line utility (with embedded HTTP server as an optional mode) for creating PDF documents from HTML content. It uses Google Chrome browser's [Chromium Embedded Framework (CEF)](https://bitbucket.org/chromiumembedded/cef/overview) library for all it's internal work; loading urls, rendering HTML & CSS pages and PDF printing, therefore, it produces perfect, accurate, excellent quality PDF documents.
